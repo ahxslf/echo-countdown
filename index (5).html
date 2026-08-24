@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echo — Countdown to 400 Members</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#f5f3ff; --muted:#a5a0bd; --dim:#6f6b86;
+    --v1:#7c5cff; --v2:#a855f7; --v3:#e879f9; --green:#4ade80;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    color:var(--ink); overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    -webkit-font-smoothing:antialiased;
+    background:#0b0a14;
+  }
+
+  /* ---------- purple gradient background ---------- */
+  .bg{position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(65vw 55vh at 50% -10%, rgba(124,92,255,.22), transparent 65%),
+      radial-gradient(50vw 50vh at 88% 92%, rgba(168,85,247,.13), transparent 65%),
+      radial-gradient(45vw 45vh at 8% 85%, rgba(88,80,200,.13), transparent 65%),
+      #0b0a14;
+  }
+  .orb{position:fixed; border-radius:50%; filter:blur(110px); z-index:0; pointer-events:none}
+  .o1{width:40vw;height:40vw; background:rgba(124,92,255,.16); top:-14vw; left:-10vw;
+      animation:drift 18s ease-in-out infinite alternate}
+  .o2{width:32vw;height:32vw; background:rgba(232,121,249,.10); bottom:-12vw; right:-8vw;
+      animation:drift 22s ease-in-out infinite alternate-reverse}
+  @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(4vw,3vh) scale(1.1)}}
+
+  .card{
+    position:relative; z-index:2;
+    width:min(92vw,460px); padding:44px 40px 40px; text-align:center;
+    background:rgba(22,18,38,.72); border:1px solid rgba(168,140,255,.14); border-radius:24px;
+    box-shadow:0 24px 70px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    display:flex; flex-direction:column; align-items:center;
+    animation:rise .7s ease both;
+  }
+  @keyframes rise{from{opacity:0; transform:translateY(14px)}to{opacity:1; transform:none}}
+
+  .guild{display:flex; align-items:center; gap:10px; margin-bottom:26px}
+  .guild img{width:34px;height:34px;border-radius:10px}
+  .guild .fb{width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg,var(--v1),var(--v2)); color:#fff;
+    display:none;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+  .guild .name{font-weight:600;font-size:15px}
+  .livepill{display:flex;align-items:center;gap:5px;margin-left:6px;
+    padding:3px 9px;border-radius:99px;font-size:9px;font-weight:700;letter-spacing:2px;
+    color:var(--green);border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.08)}
+  .livepill i{width:5px;height:5px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 6px var(--green);animation:pulse 1.4s infinite}
+  @keyframes pulse{50%{opacity:.3}}
+
+  h1{font-weight:900;font-size:clamp(21px,4.4vw,28px);letter-spacing:-.3px;margin-bottom:36px;
+    color:#fff}
+  h1 b{background:linear-gradient(90deg,var(--v1),var(--v3));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* ---------- ring ---------- */
+  .ringwrap{position:relative;width:min(58vw,260px);height:min(58vw,260px)}
+  .ringwrap svg{width:100%;height:100%;display:block}
+  #prog{transition:stroke-dashoffset 1s cubic-bezier(.3,.8,.3,1)}
+  .center{position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:7px}
+  .num{font-weight:900;font-size:clamp(56px,15vw,84px);line-height:1;letter-spacing:-3px;
+    font-variant-numeric:tabular-nums;color:#fff;
+    text-shadow:0 0 44px rgba(168,85,247,.55)}
+  .num.pop{animation:pop .45s cubic-bezier(.2,1.5,.4,1)}
+  @keyframes pop{40%{transform:scale(1.08)}}
+  .lbl{font-weight:600;font-size:10px;letter-spacing:4px;color:var(--muted);text-transform:uppercase}
+  .pct{font-size:12px;font-weight:500;color:var(--dim);font-variant-numeric:tabular-nums}
+
+  .members{margin-top:34px;font-weight:800;font-size:clamp(26px,5.5vw,36px);
+    letter-spacing:-1px;font-variant-numeric:tabular-nums}
+  .members em{font-style:normal;color:var(--muted);font-weight:500}
+
+  .err{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:65;
+    display:none;padding:8px 16px;border-radius:99px;font-size:12px;font-weight:600;
+    background:#2a1518;color:#f87171;border:1px solid rgba(248,113,113,.3)}
+  .err.show{display:block;animation:rise .3s ease both}
+
+  /* ---------- celebration ---------- */
+  #celebration{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+    background:rgba(6,5,12,.88);opacity:0;pointer-events:none;transition:opacity 3.5s ease}
+  #celebration.visible{opacity:1;pointer-events:auto}
+  #celebration img{max-width:min(88vw,940px);max-height:76vh;border-radius:14px;
+    box-shadow:0 40px 120px rgba(0,0,0,.85), 0 0 90px rgba(168,85,247,.25);
+    transform:scale(.85);opacity:0;
+    transition:transform 4.4s cubic-bezier(.16,.84,.3,1),opacity 3.4s ease .3s}
+  #celebration.visible img{transform:scale(1);opacity:1}
+  #confetti{position:fixed;inset:0;z-index:60;pointer-events:none}
+</style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="orb o1"></div><div class="orb o2"></div>
+
+  <div class="card">
+    <div class="guild">
+      <img id="icon" alt="" onerror="this.style.display='none';document.getElementById('fb').style.display='flex'">
+      <div class="fb" id="fb">E</div>
+      <span class="name" id="gname">Echo</span>
+      <span class="livepill"><i></i>LIVE</span>
+    </div>
+
+    <h1>Countdown to <b>400 Members</b></h1>
+
+    <div class="ringwrap">
+      <svg viewBox="0 0 340 340">
+        <defs>
+          <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#7c5cff"/>
+            <stop offset="55%" stop-color="#a855f7"/>
+            <stop offset="100%" stop-color="#e879f9"/>
+          </linearGradient>
+          <filter id="glowf" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="8" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <circle cx="170" cy="170" r="150" fill="none" stroke="rgba(168,140,255,.12)" stroke-width="13"/>
+        <circle id="prog" cx="170" cy="170" r="150" fill="none" stroke="url(#grad)" stroke-width="13"
+                stroke-linecap="round" filter="url(#glowf)" transform="rotate(-90 170 170)"
+                stroke-dasharray="942.48" stroke-dashoffset="942.48"/>
+      </svg>
+      <div class="center">
+        <div class="num" id="left">—</div>
+        <div class="lbl">Members Left</div>
+        <div class="pct" id="pct"></div>
+      </div>
+    </div>
+
+    <div class="members"><span id="members">—</span> <em>members</em></div>
+  </div>
+
+  <div class="err" id="err">Connection lost — retrying</div>
+  <div id="celebration"><img src="thankyou.jpg" alt="Thank you for 400 members"></div>
+  <canvas id="confetti"></canvas>
+
+<script>
+/* ============ CONFIG ============ */
+const DISCORD_API = "https://discord.com/api/v10/invites/sw8pUwUgYD?with_counts=true";
+const GOAL = 400;
+const POLL_MS = 1000;
+const CIRC = 942.48; // 2 * PI * 150
+/* ================================ */
+
+const leftEl = document.getElementById("left");
+const membersEl = document.getElementById("members");
+const pctEl = document.getElementById("pct");
+const progEl = document.getElementById("prog");
+const errEl = document.getElementById("err");
+
+let displayed = null, celebrated = false, failures = 0;
+
+async function getCounts(){
+  // Preferred: our same-origin proxy (no CORS / adblock issues)
+  try{
+    const r = await fetch("/api/counts", { cache:"no-store" });
+    if (r.ok) return await r.json();
+  }catch(e){}
+  // Fallback: direct Discord call (for plain static hosting)
+  const r = await fetch(DISCORD_API, { cache:"no-store" });
+  if (r.status === 429){
+    const d = await r.json().catch(() => null);
+    const err = new Error("rate limited"); err.retry = (d && d.retry_after) || 3;
+    throw err;
+  }
+  if (!r.ok) throw new Error("discord " + r.status);
+  return r.json();
+}
+
+function tween(el, from, to, dur = 700){
+  const t0 = performance.now();
+  (function step(t){
+    const p = Math.min((t - t0) / dur, 1);
+    el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(step);
+  })(performance.now());
+}
+
+function render(members){
+  const left = Math.max(0, GOAL - members);
+  const prevLeft = displayed === null ? null : Math.max(0, GOAL - displayed);
+
+  if (displayed === null){ leftEl.textContent = left; membersEl.textContent = members; }
+  else if (members !== displayed){
+    tween(leftEl, prevLeft, left);
+    tween(membersEl, displayed, members);
+    leftEl.classList.remove("pop"); void leftEl.offsetWidth; leftEl.classList.add("pop");
+  }
+  displayed = members;
+  progEl.style.strokeDashoffset = (CIRC * (1 - Math.min(1, members / GOAL))).toFixed(2);
+  pctEl.textContent = Math.min(100, members / GOAL * 100).toFixed(1) + "%";
+
+  if (members >= GOAL && !celebrated) celebrate();
+}
+
+async function poll(){
+  let wait = POLL_MS;
+  try{
+    const d = await getCounts();
+    failures = 0;
+    errEl.classList.remove("show");
+    if (d.guild){
+      document.getElementById("gname").textContent = d.guild.name;
+      if (d.guild.icon) document.getElementById("icon").src =
+        `https://cdn.discordapp.com/icons/${d.guild.id}/${d.guild.icon}.webp?size=256`;
+    }
+    render(d.approximate_member_count);
+  }catch(e){
+    failures++;
+    if (e && e.retry){ wait = Math.min(15000, Math.ceil(e.retry * 1000)); failures = 0; }
+    else if (failures >= 4){ errEl.classList.add("show"); wait = Math.min(8000, POLL_MS * failures); }
+  }
+  setTimeout(poll, wait);
+}
+poll();
+
+/* ============ CONFETTI ============ */
+const canvas = document.getElementById("confetti");
+const ctx = canvas.getContext("2d");
+const resize = () => { canvas.width = innerWidth; canvas.height = innerHeight; };
+addEventListener("resize", resize); resize();
+
+const COLORS = ["#a855f7","#e879f9","#7c5cff","#57F287","#FEE75C","#FFFFFF","#F98128"];
+const parts = [], MAX = 900;
+
+const add = (x, y, vx, vy) => {
+  if (parts.length >= MAX) parts.shift();
+  parts.push({ x, y, vx, vy,
+    w: 7 + Math.random()*7, h: 5 + Math.random()*8,
+    r: Math.random()*6.28, vr: (Math.random()-.5)*.3,
+    c: COLORS[Math.random()*COLORS.length|0],
+    sq: Math.random() < .75,
+    wob: Math.random()*6.28, ws: .05 + Math.random()*.08 });
+};
+const burst = (x, y, n, p = 12) => {
+  for (let i = 0; i < n; i++){
+    const a = Math.random()*6.28, s = p*(.4 + Math.random()*.8);
+    add(x, y, Math.cos(a)*s, Math.sin(a)*s - 4);
+  }
+};
+const rain = n => { for (let i = 0; i < n; i++)
+  add(Math.random()*canvas.width, -20 - Math.random()*40, (Math.random()-.5)*2, 2 + Math.random()*3); };
+const cannon = side => {
+  const x = side === "l" ? -10 : canvas.width + 10, d = side === "l" ? 1 : -1;
+  for (let i = 0; i < 45; i++)
+    add(x, canvas.height*(.7 + Math.random()*.25), d*(7 + Math.random()*9), -(11 + Math.random()*8));
+};
+(function frame(){
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let i = parts.length - 1; i >= 0; i--){
+    const p = parts[i];
+    p.wob += p.ws; p.vy = Math.min(p.vy + .14, 9); p.vx *= .992;
+    p.x += p.vx + Math.sin(p.wob)*1.1; p.y += p.vy; p.r += p.vr;
+    if (p.y > canvas.height + 40){ parts.splice(i, 1); continue; }
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+    ctx.fillStyle = p.c; ctx.globalAlpha = .95;
+    if (p.sq) ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    else { ctx.beginPath(); ctx.arc(0, 0, p.w/2.4, 0, 7); ctx.fill(); }
+    ctx.restore();
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ============ CELEBRATION ============ */
+function celebrate(){
+  celebrated = true;
+  document.title = "🎉 400 MEMBERS! — Echo";
+  document.getElementById("celebration").classList.add("visible");
+
+  burst(innerWidth/2, innerHeight*.35, 220, 15);
+  let shots = 0;
+  const volley = setInterval(() => {
+    cannon(shots % 2 ? "l" : "r");
+    if (++shots >= 8) clearInterval(volley);
+  }, 650);
+  setInterval(() => rain(7), 220);
+  setInterval(() => cannon(Math.random() < .5 ? "l" : "r"), 4200);
+}
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a30377d5ff432b1b',t:'MTc4NzU4NjE1OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+</body>
+</html>
