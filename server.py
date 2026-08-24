@@ -2,12 +2,12 @@
 """Static file server + Discord invite counts proxy (/api/counts).
 Caches Discord responses ~1s so viewers can poll every second without
 rate-limit issues; serves stale cache during backoff."""
-import json, time, threading, urllib.request, urllib.error, functools
+import json, time, threading, urllib.request, urllib.error, functools, os
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
 DISCORD_API = "https://discord.com/api/v10/invites/sw8pUwUgYD?with_counts=true"
 CACHE_TTL = 1.0
-PORT = 8000
+PORT = int(os.environ.get("PORT", 8000))  # Render $PORT'a bağlanır
 
 _cache = {"ts": 0.0, "data": None, "blocked_until": 0.0}
 _lock = threading.Lock()
@@ -82,7 +82,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    import os
     handler = functools.partial(
         Handler, directory=os.path.dirname(os.path.abspath(__file__)))
+    print(f"listening on 0.0.0.0:{PORT}", flush=True)
     ThreadingHTTPServer(("0.0.0.0", PORT), handler).serve_forever()
